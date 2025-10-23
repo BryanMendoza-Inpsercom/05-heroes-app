@@ -4,19 +4,28 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import type { Hero } from "@/heroes/interfaces/hero.interface"
 import { Brain, Eye, Gauge, Heart, Shield, Zap } from "lucide-react"
+import { useNavigate } from "react-router"
 
 interface Prop {
     Heroe: Hero;
 }
 
 export const HeroGridCar = ({ Heroe }: Prop) => {
+
+    const navegate = useNavigate();
+
+    const handleClick = () => {
+        navegate(`/heroes/${Heroe.slug}`);
+    }
+
     return (
         <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50">
-            <div className="relative h-64 overflow-hidden">
+            <div className="relative h-64">
                 <img
                     src={Heroe.image && `${Heroe.image}?height=300&width=300`}
                     alt={Heroe.alias}
-                    className="object-cover transition-all duration-500 group-hover:scale-110"
+                    className="object-cover transition-all duration-500 group-hover:scale-110 absolute top-[-30px] w-full h-[410px]"
+                    onClick={handleClick}
                 />
 
                 {/* Status indicator */}
@@ -31,7 +40,7 @@ export const HeroGridCar = ({ Heroe }: Prop) => {
                 </div>
 
                 {/* Universe badge */}
-                <Badge className={ Heroe.universe === 'DC' ? "absolute top-3 right-3 text-xs bg-blue-600 text-white": "absolute top-3 right-3 text-xs bg-red-600 text-white" }>
+                <Badge className={Heroe.universe === 'DC' ? "absolute top-3 right-3 text-xs bg-blue-600 text-white" : "absolute top-3 right-3 text-xs bg-red-600 text-white"}>
                     {Heroe.universe}
                 </Badge>
 
@@ -54,7 +63,7 @@ export const HeroGridCar = ({ Heroe }: Prop) => {
                 </Button>
             </div>
 
-            <CardHeader className="pb-3">
+            <CardHeader className="py-3 z-10 bg-gray-100/50 backdrop-blur-sm relative top-1 group-hover:top-[-10px] transition-all duration-300">
                 <div className="flex justify-between items-start">
                     <div className="space-y-1">
                         <h3 className="font-bold text-lg leading-tight">{Heroe.alias}</h3>
@@ -112,16 +121,26 @@ export const HeroGridCar = ({ Heroe }: Prop) => {
                     <div className="flex flex-wrap gap-1">
 
                         {
-                            Heroe.powers.map((poder, index) => (
+                            /*   Heroe.powers.map((poder, index) => (
+                                  <Badge key={`${poder}-${index}`} variant="outline" className="text-xs">
+                                      {poder}
+                                  </Badge>
+                              )) */
+
+                            Heroe.powers.slice(0, 3).map((poder, index) => (
                                 <Badge key={`${poder}-${index}`} variant="outline" className="text-xs">
                                     {poder}
                                 </Badge>
                             ))
                         }
 
-                        <Badge variant="outline" className="text-xs bg-gray-100">
-                            +4 more
-                        </Badge>
+                        {
+                            Heroe.powers.length > 3 && (
+                                <Badge variant="outline" className="text-xs bg-gray-100">
+                                    +{Heroe.powers.length - 3} more
+                                </Badge>
+                            )
+                        }
                     </div>
                 </div>
 

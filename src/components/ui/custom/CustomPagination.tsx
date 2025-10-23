@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "../button"
+import { useSearchParams } from "react-router";
 
 interface Props {
     totalPages: number;
@@ -7,11 +8,22 @@ interface Props {
 
 export const CustomPagination = ({ totalPages }: Props) => {
 
-    const page = 2 as number;
+    const [searchParam, setSearchParam] = useSearchParams();
+    const queryPage = searchParam.get('page') ?? '1' ;
+    const page = isNaN(+queryPage) ? 1 : +queryPage;
+
+    const handlePageChange = (page: number) =>
+    {
+        if(page < 1 || page > totalPages ) return;
+
+        setSearchParam({ page : page.toString()});
+
+    }
 
     return (
         <div className="flex items-center justify-center space-x-2">
-            <Button disabled={page === 1} variant="outline" size="sm">
+            <Button disabled={page === 1} variant="outline" size="sm"
+            onClick={() => handlePageChange(page - 1)}>
                 <ChevronLeft className="h-4 w-4" />
                 Anteriores
             </Button>
