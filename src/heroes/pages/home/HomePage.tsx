@@ -22,8 +22,8 @@ export const HomePage = () => {
   let limit = serachParams.get('limit') ?? '6';
 
 
-  const selectedTab = useMemo(()=>{
-    const validTabs = ['all','favorites','villains','heroes'];
+  const selectedTab = useMemo(() => {
+    const validTabs = ['all', 'favorites', 'villains', 'heroes'];
     return validTabs.includes(activeTab) ? activeTab : 'all';
   }, [activeTab]);
 
@@ -37,7 +37,7 @@ export const HomePage = () => {
     ] */
 
   const { data: heroesResponse } = useQuery({
-    queryKey: ['heroes'],
+    queryKey: ['heroes', { page: page, limit: limit }],
     queryFn: () => getHeroesByPage(+page, +limit),
     staleTime: 100 * 60 * 5,
   });

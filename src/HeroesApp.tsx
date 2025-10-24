@@ -9,7 +9,6 @@ export const HeroesApp = () => {
     return (
         <QueryClientProvider client={queryClient}>
             <RouterProvider router={appRouter} />
-
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider >
     )

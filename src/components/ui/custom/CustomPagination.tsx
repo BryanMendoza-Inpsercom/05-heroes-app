@@ -16,8 +16,9 @@ export const CustomPagination = ({ totalPages }: Props) => {
     {
         if(page < 1 || page > totalPages ) return;
 
-        setSearchParam({ page : page.toString()});
-
+        // setSearchParam({ page : page.toString()});
+        searchParam.set('page', page.toString());
+        setSearchParam(searchParam);
     }
 
     return (
@@ -32,7 +33,8 @@ export const CustomPagination = ({ totalPages }: Props) => {
                 Array.from({ length: totalPages }).map((_, index) => (
                     <Button
                         key={index}
-                        variant={page === index + 1 ? 'default' : 'outline'} size="sm">
+                        variant={page === index + 1 ? 'default' : 'outline'} size="sm"
+                        onClick={() => handlePageChange(index + 1)}>
                         {index + 1}
                     </Button>
                 ))
@@ -40,7 +42,8 @@ export const CustomPagination = ({ totalPages }: Props) => {
 
             <Button
                 disabled={page === totalPages}
-                variant="outline" size="sm">
+                variant="outline" size="sm"
+                onClick={() => handlePageChange(page + 1)}>
                 Siguientes
                 <ChevronRight className="h-4 w-4" />
             </Button>
