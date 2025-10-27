@@ -1,30 +1,30 @@
-import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { CustomBreadcrumbs } from "@/components/ui/custom/CustomBreadcrumbs";
 import { CustomJunbotron } from "@/components/ui/custom/CustomJunbotron";
+import { CustomPagination } from "@/components/ui/custom/CustomPagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HeroStats } from "@/heroes/components/HeroStats";
-import {
-  Heart,
-} from "lucide-react";
-import { HeroGrid } from "../hero/HeroGrid";
-import { CustomPagination } from "@/components/ui/custom/CustomPagination";
-import { CustomBreadcrumbs } from "@/components/ui/custom/CustomBreadcrumbs";
-import { useQuery } from "@tanstack/react-query";
-import { getHeroesByPage } from "@/heroes/actions/get-hero-by-page";
+import { FavoriteHeroContext } from "@/heroes/context/FavoriteHeroContext";
+import { useHeroSummary } from "@/heroes/hooks/useHeroSummary";
+import { usePaginatedHero } from "@/heroes/hooks/usePaginatedHero";
+import { Heart } from "lucide-react";
+import { use, useMemo } from "react";
 import { useSearchParams } from "react-router";
+import { HeroGrid } from "../hero/HeroGrid";
 
 export const HomePage = () => {
-
   const [serachParams, setSearchParams] = useSearchParams();
+  const { favoriteCount, favorites } = use(FavoriteHeroContext);
+  let activeTab = serachParams.get("tab") ?? "all";
+  let page = serachParams.get("page") ?? "1";
+  let limit = serachParams.get("limit") ?? "6";
+  const category = serachParams.get("category") ?? "all";
 
-  let activeTab = serachParams.get('tab') ?? 'all';
-  let page = serachParams.get('page') ?? '1';
-  let limit = serachParams.get('limit') ?? '6';
-
+  const { data: summary } = useHeroSummary();
 
   const selectedTab = useMemo(() => {
-    const validTabs = ['all', 'favorites', 'villains', 'heroes'];
-    return validTabs.includes(activeTab) ? activeTab : 'all';
+    const validTabs = ["all", "favorites", "villains", "heroes"];
+    return validTabs.includes(activeTab) ? activeTab : "all";
   }, [activeTab]);
 
   // const [activeTab, setActiveTab] = useState<'all' | 'favorites' | 'heroes' | 'villains'>('all');
@@ -36,11 +36,17 @@ export const HomePage = () => {
       { label: 'Home3', to: '/' },
     ] */
 
-  const { data: heroesResponse } = useQuery({
-    queryKey: ['heroes', { page: page, limit: limit }],
+  const { data: heroesResponse } = usePaginatedHero({
+    page: +page,
+    limit: +limit,
+    category: category,
+  });
+
+  /*   const { data: heroesResponse } = useQuery({
+    queryKey: ["heroes", { page: page, limit: limit }],
     queryFn: () => getHeroesByPage(+page, +limit),
     staleTime: 100 * 60 * 5,
-  });
+  }); */
 
   /*   useEffect(() => {
       getHeroesByPage().then()
@@ -63,7 +69,6 @@ export const HomePage = () => {
         <HeroStats />
 
         {/* Controls */}
-
 
         {/* Advanced Filters */}
         <div className="bg-white rounded-lg p-6 mb-8 shadow-sm border">
@@ -116,17 +121,42 @@ export const HomePage = () => {
         {/* Tabs */}
         <Tabs value={selectedTab} className="mb-8">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all"
-              onClick={() => setSearchParams({ tab: 'all' })}>All Characters (16)</TabsTrigger>
-            <TabsTrigger value="favorites"
-              onClick={() => setSearchParams({ tab: 'favorites' })} className="flex items-center gap-2">
-              <Heart className="h-4 w-4" />
-              Favorites (3)
+            <TabsTrigger
+              value="all"
+              onClick={() =>
+                setSearchParams({ tab: "all", category: "all", page: "1" })
+              }
+            >
+              All Characters ({summary?.totalHeroes})
             </TabsTrigger>
-            <TabsTrigger value="heroes"
-              onClick={() => setSearchParams({ tab: 'heroes' })}>Heroes (12)</TabsTrigger>
-            <TabsTrigger value="villains"
-              onClick={() => setSearchParams({ tab: 'villains' })}>Villains (2)</TabsTrigger>
+            <TabsTrigger
+              value="favorites"
+              onClick={() => setSearchParams({ tab: "favorites" })}
+              className="flex items-center gap-2"
+            >
+              <Heart className="h-4 w-4" />
+              Favorites ({favoriteCount})
+            </TabsTrigger>
+            <TabsTrigger
+              value="heroes"
+              onClick={() =>
+                setSearchParams({ tab: "heroes", category: "hero", page: "1" })
+              }
+            >
+              Heroes ({summary?.heroCount})
+            </TabsTrigger>
+            <TabsTrigger
+              value="villains"
+              onClick={() =>
+                setSearchParams({
+                  tab: "villains",
+                  category: "villain",
+                  page: "1",
+                })
+              }
+            >
+              Villains ({summary?.villainCount})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="all">
@@ -135,22 +165,22 @@ export const HomePage = () => {
           </TabsContent>
           <TabsContent value="favorites">
             {/* Favoritos*/}
-
+            <HeroGrid Heroes={favorites} />
           </TabsContent>
           <TabsContent value="heroes">
             {/* Heroes*/}
-
+            <HeroGrid Heroes={heroesResponse?.heroes} />
           </TabsContent>
           <TabsContent value="villains">
             {/* Villanos */}
-
+            <HeroGrid Heroes={heroesResponse?.heroes} />
           </TabsContent>
         </Tabs>
 
-
-
         {/* Pagination */}
-        <CustomPagination totalPages={heroesResponse?.pages ?? 1} />
+        {selectedTab !== "favorites" && (
+          <CustomPagination totalPages={heroesResponse?.pages ?? 1} />
+        )}
       </>
     </>
   );
